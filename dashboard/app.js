@@ -11,6 +11,43 @@
   var BASE = model.base_multiple || 0.25;
   var state = { sort: 'rank', dir: 1, category: 'all', chain: 'all', status: 'pre', minTvl: 0, selected: null };
 
+  /* ---------- deep links: #detail=<slug>, #category=<name>, #chain=<name>, #status=<pre|live|all> ----------
+     A link to one protocol's detail or one filtered view, so a row or a filter
+     can be shared and screenshotted exactly. Hash changes never reload. */
+  function readHash() {
+    var h = (window.location.hash || '').replace(/^#/, '');
+    var out = { detail: null };
+    if (!h) return out;
+    function hasOption(id, v) {
+      var sel = document.getElementById(id);
+      if (!sel) return false;
+      for (var i = 0; i < sel.options.length; i++) if (sel.options[i].value === v) return true;
+      return false;
+    }
+    h.split('&').forEach(function (pair) {
+      var kv = pair.split('=');
+      if (kv.length !== 2) return;
+      var k = decodeURIComponent(kv[0]);
+      var v = decodeURIComponent(kv[1]);
+      if (k === 'detail' && v) out.detail = v;
+      else if (k === 'category' && v && hasOption('f-category', v)) state.category = v;
+      else if (k === 'chain' && v && hasOption('f-chain', v)) state.chain = v;
+      else if (k === 'status' && (v === 'pre' || v === 'live' || v === 'all')) state.status = v;
+    });
+    return out;
+  }
+  function writeHash() {
+    var parts = [];
+    if (state.selected) parts.push('detail=' + encodeURIComponent(state.selected));
+    if (state.category !== 'all') parts.push('category=' + encodeURIComponent(state.category));
+    if (state.chain !== 'all') parts.push('chain=' + encodeURIComponent(state.chain));
+    if (state.status !== 'pre') parts.push('status=' + encodeURIComponent(state.status));
+    var hash = parts.length ? '#' + parts.join('&') : '';
+    try {
+      if (window.history && window.history.replaceState) window.history.replaceState(null, '', hash || window.location.pathname + window.location.search);
+    } catch (e) { /* file:// or restricted context: the link still works on load */ }
+  }
+
   /* ---------- formatting ---------- */
   function fmtUsd(n) {
     if (n === null || n === undefined || !isFinite(n)) return 'n/a';
@@ -134,9 +171,9 @@
   var chainSel = document.getElementById('f-chain');
   var statusSel = document.getElementById('f-status');
   var minTvlInput = document.getElementById('f-min-tvl');
-  catSel.addEventListener('change', function () { state.category = catSel.value; renderBoard(); });
-  chainSel.addEventListener('change', function () { state.chain = chainSel.value; renderBoard(); });
-  statusSel.addEventListener('change', function () { state.status = statusSel.value; renderBoard(); });
+  catSel.addEventListener('change', function () { state.category = catSel.value; writeHash(); renderBoard(); });
+  chainSel.addEventListener('change', function () { state.chain = chainSel.value; writeHash(); renderBoard(); });
+  statusSel.addEventListener('change', function () { state.status = statusSel.value; writeHash(); renderBoard(); });
   minTvlInput.addEventListener('input', function () {
     var v = parseFloat(minTvlInput.value);
     state.minTvl = isFinite(v) && v > 0 ? v : 0;
@@ -145,6 +182,10 @@
   document.getElementById('f-reset').addEventListener('click', function () {
     state.category = 'all'; state.chain = 'all'; state.status = 'pre'; state.minTvl = 0;
     catSel.value = 'all'; chainSel.value = 'all'; statusSel.value = 'pre'; minTvlInput.value = '';
+    state.selected = null; closeBtn.hidden = true;
+    detailBody.textContent = '';
+    detailBody.appendChild(el('p', 'muted', 'Select a row on the board to see its model breakdown and farm plan here.'));
+    writeHash();
     renderBoard();
   });
 
@@ -323,6 +364,7 @@
     closeBtn.hidden = true;
     detailBody.textContent = '';
     detailBody.appendChild(el('p', 'muted', 'Select a row on the board to see its model breakdown and farm plan here.'));
+    writeHash();
     renderBoard();
     document.getElementById('detail').scrollIntoView();
   });
@@ -338,6 +380,7 @@
     DATA.rows.forEach(function (r) { if (r.slug === slug) row = r; });
     if (!row) return;
     state.selected = slug;
+    writeHash();
     closeBtn.hidden = false;
     detailBody.textContent = '';
 
@@ -390,6 +433,15 @@
     document.getElementById('detail').scrollIntoView();
   }
 
+  /* ---------- deep link on load: filters first, then the detail if named ---------- */
+  var deep = readHash();
+  if (deep.detail || state.category !== 'all' || state.chain !== 'all' || state.status !== 'pre') {
+    if (catSel) catSel.value = state.category;
+    if (chainSel) chainSel.value = state.chain;
+    if (statusSel) statusSel.value = state.status;
+  }
+
   renderBoard();
   renderLive();
+  if (deep.detail) openDetail(deep.detail);
 })();

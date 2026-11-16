@@ -26,7 +26,7 @@ body {
   font: 400 15px/1.55 var(--font-body);
 }
 h1, h2 { margin: 0; letter-spacing: -0.02em; }
-h1 { font-size: 32px; line-height: 1.15; font-weight: 700; }
+h1 { font-size: 28px; line-height: 1.15; font-weight: 700; }
 h2 { font-size: 20px; line-height: 1.25; font-weight: 700; }
 p { margin: 0; }
 button, input, select { font: inherit; color: inherit; }
@@ -37,8 +37,9 @@ button { cursor: pointer; }
 .muted { color: var(--muted); font-size: 14px; }
 .num { font-family: var(--font-num); font-variant-numeric: tabular-nums; white-space: nowrap; }
 
-/* Masthead: navy band, amber kicker. */
-.mast { background: var(--ink); color: var(--paper); padding: 32px 0; }
+/* Masthead: navy band, amber kicker. Compact on purpose: the board must be
+   visible at a glance in a 1440x900 first screenshot, below the masthead. */
+.mast { background: var(--ink); color: var(--paper); padding: 24px 0; }
 .mast-in { display: flex; gap: 32px; justify-content: space-between; align-items: flex-start; }
 .mast-copy { max-width: 720px; }
 .kicker {
@@ -49,14 +50,14 @@ button { cursor: pointer; }
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
-.lede { margin-top: 16px; color: #d5dce8; max-width: 64ch; }
+.lede { margin-top: 8px; color: #d5dce8; max-width: 64ch; }
 .stats { display: grid; gap: 16px; margin: 8px 0 0; min-width: 224px; }
 .stats div { border-left: 3px solid var(--accent); padding-left: 16px; }
 .stats dt { color: #9fb0c9; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
 .stats dd { margin: 0; font-family: var(--font-num); font-size: 16px; font-weight: 700; }
 
 /* Cards stack down the page on the 8px scale. */
-main.wrap { display: grid; gap: 24px; padding-top: 24px; padding-bottom: 24px; }
+main.wrap { display: grid; gap: 16px; padding-top: 16px; padding-bottom: 24px; }
 .card {
   background: var(--card);
   border: 1px solid var(--line);
@@ -68,8 +69,8 @@ main.wrap { display: grid; gap: 24px; padding-top: 24px; padding-bottom: 24px; }
 
 /* Model section. */
 .formula {
-  margin: 16px 0;
-  padding: 16px;
+  margin: 12px 0;
+  padding: 12px 16px;
   background: var(--accent-soft);
   border-left: 4px solid var(--accent);
   border-radius: 0 var(--radius) var(--radius) 0;
@@ -77,7 +78,7 @@ main.wrap { display: grid; gap: 24px; padding-top: 24px; padding-bottom: 24px; }
   font-size: 14px;
   overflow-wrap: anywhere;
 }
-.consts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 0 0 16px; }
+.consts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 0 0 16px; }
 .consts div { border-top: 1px solid var(--line); padding-top: 8px; }
 .consts dt { font-weight: 700; font-size: 14px; }
 .consts dd { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
